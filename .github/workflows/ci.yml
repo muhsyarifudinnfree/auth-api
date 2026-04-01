@@ -11,17 +11,17 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ["24.11.0"]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        # Gunakan versi Node.js yang stabil (LTS).
+        # Jika 24.11.0 belum stabil, disarankan pakai 20.x atau 22.x
+        node-version: [22.x]
 
     services:
       postgres:
-        image: postgres
+        image: postgres:latest
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: mysecretpassword
           POSTGRES_DB: forumapi_test
-
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -31,14 +31,20 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v2
+      # 1. Update ke v4 karena v2 sudah deprecated (usang)
+      - uses: actions/checkout@v4
+
+      # 2. Update ke v4 dan tambahkan cache untuk mempercepat install
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
       - name: npm install migrate and test
         run: |
-          npm ci
+          # Ganti 'npm ci' ke 'npm install' jika Anda belum push package-lock.json
+          npm install 
           npm run migrate up
           npm run test
         env:
